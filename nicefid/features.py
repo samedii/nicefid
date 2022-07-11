@@ -3,11 +3,11 @@ from pathlib import Path
 from tqdm import tqdm
 import numpy as np
 import torch
-from resize_right import resize
 
 from .inception_v3w import InceptionV3W
 from .list_images import list_images
 from .image_dataset import ImageDataset
+from .resize import resize
 from . import settings
 
 
@@ -59,7 +59,8 @@ class Features:
 
             images = images.to(device)
             if images.shape[-2:] != settings.RESIZE_SHAPE:
-                images = resize(images, out_shape=settings.RESIZE_SHAPE)
+                images = resize(images)
+
             batch_features = feature_model(images.mul(255)).cpu()
             features.append(batch_features)
         features = torch.cat(features)
@@ -71,6 +72,21 @@ class Features:
 
     def save(self, path: Union[str, Path]):
         torch.save(self.features, path)
+
+
+def test_features_against_reference():
+    from cleanfid import fid
+
+    directory = "tests/pixelart/dataset_a"
+    reference_features = fid.get_folder_features(directory)
+    reimplementation = Features.from_directory(directory)
+    print(reference_features[:, 0])
+    print(reimplementation.features[:, 0])
+    assert np.allclose(
+        reference_features.mean(axis=0),
+        reimplementation.features.mean(axis=0),
+        atol=1e-3,
+    )
 
 
 def test_folder_and_iterator_equal():
@@ -91,7 +107,7 @@ def test_folder_and_iterator_equal():
 
 def test_save_load_works():
     a = Features.from_directory("tests/pixelart/dataset_a")
-    path = Path("test_features.npz")
+    path = Path("test_features.pt")
     a.save(path)
     b = Features.from_path(path)
     path.unlink()
