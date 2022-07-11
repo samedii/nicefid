@@ -3,8 +3,9 @@ from pathlib import Path
 from tqdm import tqdm
 import numpy as np
 import torch
-
 from cleanfid import fid
+
+import nicefid
 
 MODE = "clean"
 
@@ -75,11 +76,11 @@ class Features:
         return Features(features=features)
 
     @staticmethod
-    def from_name(name: str) -> "Features":
-        raise NotImplementedError()
+    def from_path(path: Union[str, Path]) -> "Features":
+        return Features(np.load(path)["features"])
 
-    def save(self, name: str):
-        raise NotImplementedError()
+    def save(self, path: Union[str, Path]):
+        np.savez_compressed(path, features=self.features)
 
 
 def test_folder_and_generator_equal():
@@ -96,3 +97,12 @@ def test_folder_and_generator_equal():
     b = Features.from_generator(generator)
 
     assert np.allclose(a.features.mean(axis=0), b.features.mean(axis=0), atol=1e-3)
+
+
+def test_save_load_works():
+    a = Features.from_directory("tests/pixelart/dataset_a")
+    path = Path("test_features.npz")
+    a.save(path)
+    b = Features.from_path(path)
+    path.unlink()
+    assert np.allclose(a.features, b.features)

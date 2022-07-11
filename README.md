@@ -21,11 +21,8 @@ pip install nicefid
 ```python
 nicefid.Features.from_directory(path: Union[str, Path])
 nicefid.Features.from_generator(generator: Callable[[], torch.Tensor])  # NCHW
-nicefid.Features.from_name(name: str)
-
-features.save(name: str)
-nicefid.saved_features_exists(name: str) -> bool
-nicefid.remove_saved_features(name: str)
+nicefid.Features.from_path(path: Union[str, Path])
+features.save(path: Union[str, Path])
 
 nicefid.compute_fid(features_a, features_b)
 nicefid.compute_kid(features_a, features_b)
@@ -43,10 +40,4 @@ features_real = nicefid.Features.from_directory(...)
 
 fid = nicefid.compute_fid(features_generated, features_real)
 kid = nicefid.compute_kid(features_generated, features_real)
-```
-
-### Save features
-
-```python
-nicefid.Features.from_directory("test-dataset").save(name)
 ```
