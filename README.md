@@ -1,6 +1,6 @@
 # nicefid
 
-Minimalistic wrapper around [cleanfid](https://github.com/GaParmar/clean-fid) to make the api more user friendly. Calculates FID and KID from sets of images.
+Minimalistic FID and KID implementation. Reference checked against [cleanfid](https://github.com/GaParmar/clean-fid).
 
 > [On Aliased Resizing and Surprising Subtleties in GAN Evaluation](https://arxiv.org/abs/2104.11222)
 

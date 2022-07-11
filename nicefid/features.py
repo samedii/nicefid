@@ -3,24 +3,19 @@ from pathlib import Path
 from tqdm import tqdm
 import numpy as np
 import torch
-from cleanfid import fid
+from resize_right import resize
 
-MODE = "clean"
+from .inception_v3w import InceptionV3W
+from .list_images import list_images
+from .image_dataset import ImageDataset
+from . import settings
 
 
 class Features:
-    features: np.array
+    features: torch.Tensor
 
     def __init__(self, features: np.array):
         self.features = features
-
-    @property
-    def mu(self):
-        return np.mean(self.features, axis=0)
-
-    @property
-    def sigma(self):
-        return np.cov(self.features, rowvar=False)
 
     @staticmethod
     def from_directory(
@@ -29,19 +24,15 @@ class Features:
         n_workers=12,
         device=torch.device("cuda"),
     ) -> "Features":
-        feature_model = fid.build_feature_extractor(MODE, device)
-        features = fid.get_folder_features(
-            str(path),
-            feature_model,
-            num_workers=n_workers,
+        image_dataset = ImageDataset(list_images(path))
+        data_loader = torch.utils.data.DataLoader(
+            image_dataset,
             batch_size=batch_size,
-            device=torch.device("cuda"),
-            mode=MODE,
-            description=f"Extracting features for {Path(path).name} : ",
-            verbose=True,
-            custom_image_tranform=None,
+            shuffle=False,
+            drop_last=False,
+            num_workers=n_workers,
         )
-        return Features(features=features)
+        return Features.from_iterator(data_loader, device)
 
     @staticmethod
     def from_iterator(
@@ -53,32 +44,33 @@ class Features:
                 range between 0 and 1.
             device: The device to use for the feature extractor.
         """
-        model = fid.build_feature_extractor(MODE, device)
-        fn_resize = fid.build_resizer(MODE)
+        feature_model = InceptionV3W().eval().requires_grad_(False).to(device)
 
         features = list()
         for images in iterator:
             if images.ndim != 4:
-                raise ValueError(f"Expected NCHW images but got {images.shape}.")
+                raise ValueError(f"Expected NCHW images but got {images.shape}")
+            if images.shape[1] != 3:
+                raise ValueError(f"Expected 3 channels (RGB) but got {images.shape}")
+            if images.max() >= 128:
+                raise ValueError(
+                    f"Expected image in range [0, 1] but got far larger max value {images.max().item()}"
+                )
 
-            resized_images = list()
-            for current_image in images:
-                image_numpy = current_image.mul(255).cpu().numpy().transpose((1, 2, 0))
-                resized_image = fn_resize(image_numpy)
-                resized_images.append(torch.tensor(resized_image.transpose((2, 0, 1))))
-            batch_features = fid.get_batch_features(
-                torch.stack(resized_images), model, device
-            )
+            images = images.to(device)
+            if images.shape[-2:] != settings.RESIZE_SHAPE:
+                images = resize(images, out_shape=settings.RESIZE_SHAPE)
+            batch_features = feature_model(images.mul(255)).cpu()
             features.append(batch_features)
-        features = np.concatenate(features)
+        features = torch.cat(features)
         return Features(features=features)
 
     @staticmethod
     def from_path(path: Union[str, Path]) -> "Features":
-        return Features(np.load(path)["features"])
+        return Features(features=torch.load(path))
 
     def save(self, path: Union[str, Path]):
-        np.savez_compressed(path, features=self.features)
+        torch.save(self.features, path)
 
 
 def test_folder_and_iterator_equal():

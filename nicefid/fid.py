@@ -1,6 +1,5 @@
+from multiprocessing.sharedctypes import Value
 import torch
-
-from .features import Features
 
 
 class _MatrixSquareRootEig(torch.autograd.Function):
@@ -38,19 +37,3 @@ def fid(x, y, eps=1e-8):
         x_cov + y_cov - 2 * sqrtm_eig(x_cov_sqrt @ y_cov @ x_cov_sqrt + eps_eye)
     )
     return mean_term + cov_term
-
-
-def compute_fid(a: Features, b: Features) -> float:
-    return fid(a.features, b.features)
-
-
-def test_fid_directories():
-    from cleanfid import fid
-
-    reference_fid_score = fid.compute_fid(
-        "tests/pixelart/dataset_a", "tests/pixelart/dataset_b"
-    )
-
-    features_a = Features.from_directory("tests/pixelart/dataset_a")
-    features_b = Features.from_directory("tests/pixelart/dataset_b")
-    assert compute_fid(features_a, features_b) == reference_fid_score
