@@ -1,8 +1,8 @@
-import os
 import torch
 import torch.nn as nn
-from .check_download_inception import check_download_inception
 import contextlib
+
+from .check_download_inception import check_download_inception
 
 
 @contextlib.contextmanager
@@ -19,7 +19,7 @@ def disable_gpu_fuser_on_pt19():
 
 
 class InceptionV3W(nn.Module):
-    def __init__(self, path=None, resize_inside=False):
+    def __init__(self, path=None):
         """
         Wrapper around Inception V3 torchscript model provided here
         https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metrics/inception-2015-12-05.pt
@@ -33,7 +33,6 @@ class InceptionV3W(nn.Module):
         inception_path = check_download_inception(fpath=path)
         self.base = torch.jit.load(inception_path).eval()
         self.layers = self.base.layers
-        self.resize_inside = resize_inside
 
     def forward(self, x):
         """
@@ -44,15 +43,14 @@ class InceptionV3W(nn.Module):
         """
         with disable_gpu_fuser_on_pt19():
             bs = x.shape[0]
-            if self.resize_inside:
-                features = self.base(x, return_features=True).view((bs, 2048))
-            else:
-                # make sure it is resized already
-                assert x.shape[-2:] == (299, 299)
-                # apply normalization
-                x1 = x - 128
-                x2 = x1 / 128
-                features = self.layers.forward(
-                    x2,
-                ).view((bs, 2048))
+
+            # make sure it is resized already
+            assert x.shape[-2:] == (299, 299)
+            # apply normalization
+            x1 = x - 128
+            x2 = x1 / 128
+            features = self.layers.forward(
+                x2,
+            ).view((bs, 2048))
+
             return features

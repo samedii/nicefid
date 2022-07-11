@@ -1,4 +1,5 @@
 from resize_right import resize
+import torch
 from torch import nn
 from torchvision import models, transforms
 from torchvision.models import feature_extraction
@@ -6,7 +7,7 @@ import warnings
 
 
 class InceptionV3WFeatureExtractor(nn.Module):
-    def __init__(self, device="cpu"):
+    def __init__(self, device=torch.device("cuda")):
         super().__init__()
         model = (
             models.inception_v3(pretrained=True).to(device).eval().requires_grad_(False)
