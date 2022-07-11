@@ -31,7 +31,7 @@ def cleanfid_resize(image: np.array, output_size: Tuple[int, int]) -> np.array:
 
     def resize_single_channel(x_np):
         img = Image.fromarray(x_np.astype(np.float32), mode="F")
-        img = img.resize(output_size, resample=Image.BICUBIC)
+        img = img.resize(output_size, resample=Image.Resampling.BICUBIC)
         return np.asarray(img).clip(0, 255).reshape(s1, s2, 1)
 
     def func(x):

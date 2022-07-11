@@ -23,6 +23,7 @@ class Features:
         batch_size=32,
         n_workers=12,
         device=torch.device("cuda"),
+        model=None,
     ) -> "Features":
         image_dataset = ImageDataset(list_images(path))
         data_loader = torch.utils.data.DataLoader(
@@ -32,11 +33,13 @@ class Features:
             drop_last=False,
             num_workers=n_workers,
         )
-        return Features.from_iterator(data_loader, device)
+        return Features.from_iterator(data_loader, device, model)
 
     @staticmethod
     def from_iterator(
-        iterator: Iterator[torch.Tensor], device=torch.device("cuda")
+        iterator: Iterator[torch.Tensor],
+        device=torch.device("cuda"),
+        model=None,
     ) -> "Features":
         """
         Args:
@@ -44,7 +47,8 @@ class Features:
                 range between 0 and 1.
             device: The device to use for the feature extractor.
         """
-        feature_model = InceptionV3W().eval().requires_grad_(False).to(device)
+        if model is None:
+            model = InceptionV3W().eval().requires_grad_(False).to(device)
 
         features = list()
         for images in iterator:
@@ -59,9 +63,9 @@ class Features:
 
             images = images.to(device)
             if images.shape[-2:] != settings.RESIZE_SHAPE:
-                images = resize(images)
+                images = torch.stack([resize(image) for image in images])
 
-            batch_features = feature_model(images.mul(255)).cpu()
+            batch_features = model(images.mul(255)).cpu()
             features.append(batch_features)
         features = torch.cat(features)
         return Features(features=features)

@@ -1,6 +1,8 @@
 # nicefid
 
 Minimalistic FID and KID implementation. Reference checked against [cleanfid](https://github.com/GaParmar/clean-fid).
+Code is a mix between [crowsonkb's implementation](https://github.com/crowsonkb/k-diffusion/blob/master/k_diffusion/evaluation.py)
+and [cleanfid](https://github.com/GaParmar/clean-fid).
 
 > [On Aliased Resizing and Surprising Subtleties in GAN Evaluation](https://arxiv.org/abs/2104.11222)
 
