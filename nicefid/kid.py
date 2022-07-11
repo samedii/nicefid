@@ -1,6 +1,3 @@
-from .features import Features
-
-
 def polynomial_kernel(x, y):
     d = x.shape[-1]
     dot = x @ y.transpose(-2, -1)
@@ -20,21 +17,3 @@ def kid(x, y, kernel=polynomial_kernel):
     term_2 = kyy_sum / n / (n - 1)
     term_3 = kxy_sum * 2 / m / n
     return term_1 + term_2 - term_3
-
-
-def compute_kid(a: Features, b: Features) -> float:
-    return kid(a.features, b.features)
-
-
-def test_kid_directories():
-    import numpy as np
-    from cleanfid import fid
-
-    np.random.seed(123)
-    reference_kid_score = fid.compute_kid(
-        "tests/pixelart/dataset_a", "tests/pixelart/dataset_b"
-    )
-    np.random.seed(123)
-    features_a = Features.from_directory("tests/pixelart/dataset_a")
-    features_b = Features.from_directory("tests/pixelart/dataset_b")
-    assert compute_kid(features_a, features_b) == reference_kid_score
