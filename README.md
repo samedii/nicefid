@@ -20,8 +20,7 @@ pip install nicefid
 
 ```python
 nicefid.Features.from_directory(path: Union[str, Path])
-nicefid.Features.from_tensor(tensor: torch.Tensor)
-nicefid.Features.from_generator(generator: Callable[[], torch.Tensor])
+nicefid.Features.from_generator(generator: Callable[[], torch.Tensor])  # NCHW
 nicefid.Features.from_name(name: str)
 
 features.save(name: str)

@@ -1,7 +1,10 @@
 [tool.poetry]
 name = "nicefid"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "Minimalistic wrapper around cleanfid to make the api more user friendly. Calculates FID and KID from sets of images."
+homepage = "https://github.com/samedii/nicefid"
+repository = "https://github.com/samedii/nicefid"
+readme = "README.md"
 authors = ["Richard Löwenström <samedii@gmail.com>"]
 license = "MIT"
 
