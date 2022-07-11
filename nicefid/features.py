@@ -84,8 +84,6 @@ def test_features_against_reference():
     directory = "tests/pixelart/dataset_a"
     reference_features = fid.get_folder_features(directory)
     reimplementation = Features.from_directory(directory)
-    print(reference_features[:, 0])
-    print(reimplementation.features[:, 0])
     assert np.allclose(
         reference_features.mean(axis=0),
         reimplementation.features.mean(axis=0),
