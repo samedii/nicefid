@@ -7,6 +7,12 @@ Minimalistic wrapper around [cleanfid](https://github.com/GaParmar/clean-fid) to
 ## Install
 
 ```bash
+poetry add nicefid
+```
+
+Or, for the old timers:
+
+```bash
 pip install nicefid
 ```
 
@@ -18,7 +24,9 @@ nicefid.Features.from_tensor(tensor: torch.Tensor)
 nicefid.Features.from_generator(generator: Callable[[], torch.Tensor])
 nicefid.Features.from_name(name: str)
 
-nicefid.Features.from_directory("test-dataset").save(name)
+features.save(name: str)
+nicefid.saved_features_exists(name: str) -> bool
+nicefid.remove_saved_features(name: str)
 
 nicefid.compute_fid(features_a, features_b)
 nicefid.compute_kid(features_a, features_b)
