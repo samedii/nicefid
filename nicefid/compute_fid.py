@@ -7,18 +7,18 @@ from .sqrtm_eig import sqrtm_eig
 
 
 # 307 vs 310 FID compard to cleanfid
-def fid(x, y, eps=1e-6):
-    x_mean = x.mean(dim=0)
-    y_mean = y.mean(dim=0)
-    mean_term = (x_mean - y_mean).pow(2).sum()
-    x_cov = torch.cov(x.T)
-    y_cov = torch.cov(y.T)
-    eps_eye = torch.eye(x_cov.shape[0], device=x_cov.device, dtype=x_cov.dtype) * eps
-    x_cov_sqrt = sqrtm_eig(x_cov + eps_eye)
-    cov_term = torch.trace(
-        x_cov + y_cov - 2 * sqrtm_eig(x_cov_sqrt @ y_cov @ x_cov_sqrt + eps_eye)
-    )
-    return mean_term + cov_term
+# def fid(x, y, eps=1e-6):
+#     x_mean = x.mean(dim=0)
+#     y_mean = y.mean(dim=0)
+#     mean_term = (x_mean - y_mean).pow(2).sum()
+#     x_cov = torch.cov(x.T)
+#     y_cov = torch.cov(y.T)
+#     eps_eye = torch.eye(x_cov.shape[0], device=x_cov.device, dtype=x_cov.dtype) * eps
+#     x_cov_sqrt = sqrtm_eig(x_cov + eps_eye)
+#     cov_term = torch.trace(
+#         x_cov + y_cov - 2 * sqrtm_eig(x_cov_sqrt @ y_cov @ x_cov_sqrt + eps_eye)
+#     )
+#     return mean_term + cov_term
 
 
 def cleanfid_fid(x: np.array, y: np.array, eps=1e-6) -> float:
