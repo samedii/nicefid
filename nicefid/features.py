@@ -1,11 +1,9 @@
-from typing import Union, Callable
+from typing import Iterator, Union, Iterator
 from pathlib import Path
 from tqdm import tqdm
 import numpy as np
 import torch
 from cleanfid import fid
-
-import nicefid
 
 MODE = "clean"
 
@@ -46,12 +44,12 @@ class Features:
         return Features(features=features)
 
     @staticmethod
-    def from_generator(
-        generator: Callable[[], torch.Tensor], device=torch.device("cuda")
+    def from_iterator(
+        iterator: Iterator[torch.Tensor], device=torch.device("cuda")
     ) -> "Features":
         """
         Args:
-            generator: A generator that yields batches of images NCHW in the
+            iterator: An iterator that yields batches of images NCHW in the
                 range between 0 and 1.
             device: The device to use for the feature extractor.
         """
@@ -59,7 +57,7 @@ class Features:
         fn_resize = fid.build_resizer(MODE)
 
         features = list()
-        for images in generator():
+        for images in iterator:
             if images.ndim != 4:
                 raise ValueError(f"Expected NCHW images but got {images.shape}.")
 
@@ -83,18 +81,18 @@ class Features:
         np.savez_compressed(path, features=self.features)
 
 
-def test_folder_and_generator_equal():
+def test_folder_and_iterator_equal():
     from PIL import Image
     import torchvision.transforms.functional as TF
 
     directory = Path("tests/pixelart/dataset_a")
     a = Features.from_directory(directory, batch_size=1)
 
-    def generator():
+    def iterator():
         for image_path in directory.glob("*.png"):
             yield TF.to_tensor(Image.open(image_path))[None]
 
-    b = Features.from_generator(generator)
+    b = Features.from_iterator(iterator())
 
     assert np.allclose(a.features.mean(axis=0), b.features.mean(axis=0), atol=1e-3)
 

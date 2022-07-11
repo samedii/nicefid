@@ -20,7 +20,7 @@ pip install nicefid
 
 ```python
 nicefid.Features.from_directory(path: Union[str, Path])
-nicefid.Features.from_generator(generator: Callable[[], torch.Tensor])  # NCHW
+nicefid.Features.from_iterator(iterator: Iterator[torch.Tensor])  # NCHW
 nicefid.Features.from_path(path: Union[str, Path])
 features.save(path: Union[str, Path])
 
@@ -35,7 +35,7 @@ Comparing directory with generated images.
 ```python
 import nicefid
 
-features_generated = nicefid.Features.from_generator(...)
+features_generated = nicefid.Features.from_iterator(...)
 features_real = nicefid.Features.from_directory(...)
 
 fid = nicefid.compute_fid(features_generated, features_real)
