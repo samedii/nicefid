@@ -46,7 +46,6 @@ def cleanfid_fid(x: np.array, y: np.array, eps=1e-6) -> float:
             "fid calculation produces singular product; "
             "adding %s to diagonal of cov estimates"
         ) % eps
-        print(msg)
         offset = np.eye(sigma1.shape[0]) * eps
         covmean = linalg.sqrtm((sigma1 + offset).dot(sigma2 + offset))
 

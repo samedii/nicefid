@@ -1,3 +1,5 @@
+import torch
+
 from .features import Features
 
 
@@ -8,6 +10,9 @@ def polynomial_kernel(x, y):
 
 
 def kid(x, y, kernel=polynomial_kernel):
+    """
+    cleanfid's implementation is quite different and also stochastic
+    """
     m = x.shape[-2]
     n = y.shape[-2]
     kxx = kernel(x, x)
@@ -22,7 +27,7 @@ def kid(x, y, kernel=polynomial_kernel):
     return term_1 + term_2 - term_3
 
 
-def compute_kid(a: Features, b: Features) -> float:
+def compute_kid(a: Features, b: Features) -> torch.Tensor:
     return kid(a.features, b.features)
 
 
@@ -30,11 +35,15 @@ def test_kid_directories():
     import numpy as np
     from cleanfid import fid
 
-    np.random.seed(123)
-    reference_kid_score = fid.compute_kid(
-        "tests/pixelart/dataset_a", "tests/pixelart/dataset_b"
-    )
-    np.random.seed(123)
+    reference_kid_score = np.stack(
+        [
+            fid.compute_kid("tests/pixelart/dataset_a", "tests/pixelart/dataset_b")
+            for _ in range(10)
+        ]
+    ).mean()
+
     features_a = Features.from_directory("tests/pixelart/dataset_a")
     features_b = Features.from_directory("tests/pixelart/dataset_b")
-    assert compute_kid(features_a, features_b) == reference_kid_score
+    assert np.allclose(
+        compute_kid(features_a, features_b), reference_kid_score, atol=1e-2
+    )
