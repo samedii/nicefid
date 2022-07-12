@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nicefid"
-version = "2.1.0"
+version = "2.1.1"
 description = "Minimalistic FID and KID implementation. Reference checked against cleanfid"
 homepage = "https://github.com/samedii/nicefid"
 repository = "https://github.com/samedii/nicefid"

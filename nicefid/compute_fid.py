@@ -6,7 +6,7 @@ from .features import Features
 from .sqrtm_eig import sqrtm_eig
 
 
-# 307 vs 310 FID compard to cleanfid
+# 307 vs 310 FID compared to cleanfid
 # def fid(x, y, eps=1e-6):
 #     x_mean = x.mean(dim=0)
 #     y_mean = y.mean(dim=0)
@@ -76,5 +76,5 @@ def test_fid_directories():
     features_a = Features.from_directory("tests/pixelart/dataset_a")
     features_b = Features.from_directory("tests/pixelart/dataset_b")
     assert np.allclose(
-        compute_fid(features_a, features_b), reference_fid_score, atol=1e-2
+        compute_fid(features_a, features_b), reference_fid_score, rtol=1e-3
     )

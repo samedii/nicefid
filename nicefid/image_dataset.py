@@ -14,4 +14,4 @@ class ImageDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         image = Image.open(self.image_paths[index]).convert("RGB")
-        return resize(TF.to_tensor(image))
+        return resize(TF.to_tensor(image)[None])[0]

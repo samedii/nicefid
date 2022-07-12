@@ -1,6 +1,5 @@
 from typing import Iterator, Union, Iterator
 from pathlib import Path
-from tqdm import tqdm
 import numpy as np
 import torch
 
@@ -14,7 +13,7 @@ from . import settings
 class Features:
     features: torch.Tensor
 
-    def __init__(self, features: np.array):
+    def __init__(self, features: torch.Tensor):
         self.features = features
 
     @staticmethod
@@ -63,12 +62,12 @@ class Features:
 
             images = images.to(device)
             if images.shape[-2:] != settings.RESIZE_SHAPE:
-                images = torch.stack([resize(image) for image in images])
+                images = resize(images)
 
-            batch_features = model(images.mul(255)).cpu()
+            batch_features = model(images.mul(255))
             features.append(batch_features)
         features = torch.cat(features)
-        return Features(features=features)
+        return Features(features=features.cpu())
 
     @staticmethod
     def from_path(path: Union[str, Path]) -> "Features":
