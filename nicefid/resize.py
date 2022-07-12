@@ -12,7 +12,8 @@ from .cleanfid_resize import cleanfid_resize
 #     images: torch.Tensor, output_size: Tuple[int, int] = settings.RESIZE_SHAPE
 # ) -> torch.Tensor:
 #     """
-#     Resize images to the given output size. Atol vs cleanfid implementation is around 1e-3.
+#     Resize images to the given output size. Atol for pixel values vs cleanfid implementation
+#     passes 1e-3. Rtol for FID value passes 1e-3.
 #     """
 #     return resize_right(
 #         images,
@@ -44,7 +45,7 @@ def test_resize_same():
     image = Image.open("tests/pixelart/dataset_a/out_00003.png")
     reference_resize = build_resizer("clean")
 
-    resized = resize(TF.to_tensor(image))
+    resized = resize(TF.to_tensor(image)[None])[0]
 
     assert np.allclose(
         reference_resize(np.array(image)),

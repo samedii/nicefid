@@ -6,7 +6,7 @@ from .features import Features
 from .sqrtm_eig import sqrtm_eig
 
 
-# 307 vs 310 FID compared to cleanfid
+# FID 307 vs 310 compared to cleanfid
 # def fid(x, y, eps=1e-6):
 #     x_mean = x.mean(dim=0)
 #     y_mean = y.mean(dim=0)
@@ -75,6 +75,37 @@ def test_fid_directories():
 
     features_a = Features.from_directory("tests/pixelart/dataset_a")
     features_b = Features.from_directory("tests/pixelart/dataset_b")
-    assert np.allclose(
-        compute_fid(features_a, features_b), reference_fid_score, rtol=1e-3
+    new_fid = compute_fid(features_a, features_b)
+    print(reference_fid_score, new_fid)
+    assert np.allclose(new_fid, reference_fid_score, rtol=1e-3)
+
+
+def test_fid_random_noise(tmpdir):
+    from pathlib import Path
+    from PIL import Image
+    from cleanfid import fid
+
+    temporary_directory = Path(tmpdir)
+    dataset_a_directory = temporary_directory / "dataset_a"
+    dataset_a_directory.mkdir()
+    for index in range(128):
+        Image.fromarray(torch.rand((32, 32, 3)).mul(255).byte().numpy()).save(
+            dataset_a_directory / f"{index}.bmp"
+        )
+
+    dataset_b_directory = temporary_directory / "dataset_b"
+    dataset_b_directory.mkdir()
+    for index in range(128):
+        Image.fromarray(torch.rand((32, 32, 3)).mul(255).byte().numpy()).save(
+            dataset_b_directory / f"{index}.bmp"
+        )
+
+    reference_fid_score = fid.compute_fid(
+        str(dataset_a_directory), str(dataset_b_directory)
     )
+
+    features_a = Features.from_directory(dataset_a_directory)
+    features_b = Features.from_directory(dataset_b_directory)
+    new_fid = compute_fid(features_a, features_b)
+    print(reference_fid_score, new_fid)
+    assert np.allclose(new_fid, reference_fid_score, rtol=1e-3)
